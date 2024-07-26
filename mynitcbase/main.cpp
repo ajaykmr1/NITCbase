@@ -10,7 +10,7 @@ void printRelations()
 {
   // create objects for the relation catalog and attribute catalog
   RecBuffer relCatBuffer(RELCAT_BLOCK);
-  RecBuffer attrCatBuffer(ATTRCAT_BLOCK);
+  
 
   HeadInfo relCatHeader;
   HeadInfo attrCatHeader;
@@ -18,7 +18,6 @@ void printRelations()
   // load the headers of both the blocks into relCatHeader and attrCatHeader.
   // (we will implement these functions later)
   relCatBuffer.getHeader(&relCatHeader);
-  attrCatBuffer.getHeader(&attrCatHeader);
 
   for (int i = 0; i < relCatHeader.numEntries; i++)
   {
@@ -28,6 +27,9 @@ void printRelations()
     relCatBuffer.getRecord(relCatRecord, i);
 
     printf("Relation: %s\n", relCatRecord[RELCAT_REL_NAME_INDEX].sVal);
+
+    RecBuffer attrCatBuffer(ATTRCAT_BLOCK);
+    attrCatBuffer.getHeader(&attrCatHeader);
 
     for (int j = 0; j < attrCatHeader.numEntries; j++)
     {
@@ -41,8 +43,17 @@ void printRelations()
         const char *attrType = attrCatRecord[ATTRCAT_ATTR_TYPE_INDEX].nVal == NUMBER ? "NUM" : "STR";
         printf("  %s: %s\n", attrCatRecord[ATTRCAT_ATTR_NAME_INDEX].sVal, attrType);
       }
+
+      if(j == attrCatHeader.numSlots - 1){
+        j = -1;
+        if(attrCatHeader.rblock == -1) break;
+        attrCatBuffer = RecBuffer (attrCatHeader.rblock);
+        attrCatBuffer.getHeader(&attrCatHeader);
+      }
     }
+
     printf("\n");
+
   }
 }
 
